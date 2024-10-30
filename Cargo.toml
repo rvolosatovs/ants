@@ -1,0 +1,44 @@
+[package]
+name = "ants"
+version = "0.1.0-alpha.4"
+description = "Low-level async NATS.io client"
+
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[workspace.package]
+authors = ["Roman Volosatovs <rvolosatovs@riseup.net>"]
+edition = "2021"
+homepage = "https://github.com/rvolosatovs/ants"
+license = "Apache-2.0 WITH LLVM-exception"
+repository = "https://github.com/rvolosatovs/ants"
+
+[dependencies]
+anyhow = { workspace = true }
+bytes = { workspace = true }
+futures = { workspace = true }
+memchr = { workspace = true, features = ["std"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["std"] }
+tokio = { workspace = true, features = ["io-util", "macros", "net", "sync"] }
+tokio-util = { workspace = true, features = ["codec", "io"] }
+tracing = { workspace = true }
+
+[dev-dependencies]
+test-log = { workspace = true, features = ["color", "log", "trace"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[workspace.dependencies]
+anyhow = { version = "1", default-features = false }
+bytes = { version = "1", default-features = false }
+futures = { version = "0.3", default-features = false }
+memchr = { version = "2", default-features = false }
+serde = { version = "1", default-features = false }
+serde_json = { version = "1", default-features = false }
+test-log = { version = "0.2", default-features = false }
+tokio = { version = "1.41", default-features = false }
+tokio-util = { version = "0.7", default-features = false }
+tracing = { version = "0.1", default-features = false }
