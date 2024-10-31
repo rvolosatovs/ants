@@ -1,6 +1,6 @@
 [package]
 name = "ants"
-version = "0.1.0-alpha.4"
+version = "0.1.0-alpha.5"
 description = "Low-level async NATS.io client"
 
 authors.workspace = true

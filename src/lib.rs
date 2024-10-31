@@ -210,17 +210,17 @@ where
         &mut self,
         subs: &mut HashMap<Bytes, (mpsc::Sender<Message>, Option<usize>)>,
         cmd: Command,
-    ) -> anyhow::Result<bool> {
+    ) -> anyhow::Result<Option<bool>> {
         match cmd {
             Command::ServerInfo(tx) => {
                 if let Err(_) = tx.send(self.info.subscribe()) {
                     warn!("server info receiver dropped");
                 }
-                Ok(false)
+                Ok(None)
             }
             Command::Connect(opts) => {
                 self.tx.feed(ClientOp::Connect(opts)).await?;
-                Ok(true)
+                Ok(Some(true))
             }
             Command::Subscribe {
                 subject,
@@ -236,7 +236,7 @@ where
                     })
                     .await?;
                 subs.insert(sid, (tx, None));
-                Ok(true)
+                Ok(Some(true))
             }
             Command::Unsubscribe { sid, max } => {
                 let mut sub = match subs.entry(sid.clone()) {
@@ -266,7 +266,7 @@ where
                         .await?;
                     sub.remove();
                 }
-                Ok(true)
+                Ok(Some(true))
             }
             Command::Publish {
                 subject,
@@ -289,17 +289,17 @@ where
                     }
                 };
                 self.tx.feed(op).await?;
-                Ok(true)
+                Ok(Some(true))
             }
             Command::Flush => {
                 self.tx.flush().await?;
-                Ok(false)
+                Ok(Some(false))
             }
             Command::Batch(cmds) => {
-                let mut has_data = false;
+                let mut has_data = None;
                 for cmd in cmds {
-                    if Box::pin(self.handle_command(subs, cmd)).await? {
-                        has_data = true;
+                    if let Some(ok) = Box::pin(self.handle_command(subs, cmd)).await? {
+                        has_data = Some(ok);
                     }
                 }
                 Ok(has_data)
@@ -336,10 +336,13 @@ where
                 },
                 Some(cmd) = cmds.recv() => {
                     match self.handle_command(&mut subs, cmd).await {
-                        Ok(true) => {
+                        Ok(Some(true)) => {
                             has_data = true;
                         },
-                        Ok(false) => {},
+                        Ok(Some(false)) => {
+                            has_data = false;
+                        },
+                        Ok(None) => {},
                         Err(err) => {
                             errs.send(ConnError::ClientCommand(err)).await?;
                         },
