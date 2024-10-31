@@ -473,6 +473,7 @@ pub async fn connect_tcp(
     FramedRead<OwnedReadHalf, ServerOpDecoder>,
 )> {
     let stream = TcpStream::connect(addr).await?;
+    stream.set_nodelay(true)?;
     let (rx, tx) = stream.into_split();
     Ok((
         FramedWrite::new(tx, ClientOpEncoder),
